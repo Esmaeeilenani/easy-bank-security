@@ -14,6 +14,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 // to accept only https
 //                .requiresChannel(rcc-> rcc.anyRequest().requiresSecure())
