@@ -4,14 +4,12 @@ import com.example.eazybanck.model.Customer;
 import com.example.eazybanck.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("")
 public class UserController {
 
     private final CustomerService customerService;
@@ -22,5 +20,14 @@ public class UserController {
         return customerService.registerNewCustomer(customer);
 
     }
+
+    @GetMapping("/user")
+    public ResponseEntity<Customer> login(Authentication authentication) {
+
+        return ResponseEntity.ok(customerService.findByEmail(authentication.getName()).orElse(null));
+
+    }
+
+
 
 }
