@@ -3,6 +3,7 @@ package com.example.eazybanck.security;
 import com.example.eazybanck.model.Customer;
 import com.example.eazybanck.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,12 @@ public class JpaUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(customer.getEmail())
                 .password(customer.getPwd())
-                .authorities(customer.getRole())
+                .authorities(customer
+                        .getAuthorities()
+                        .stream()
+                        .map(a-> new SimpleGrantedAuthority(a.getName()))
+                        .toList()
+                )
                 .build();
     }
 }

@@ -1,13 +1,21 @@
 package com.example.eazybanck.security;
 
 import com.example.eazybanck.filter.CsrfCookieFilter;
+import com.example.eazybanck.filter.JWTTokenGeneratorFilter;
+import com.example.eazybanck.filter.JWTTokenValidatorFilter;
+import com.example.eazybanck.security.authintecationproviders.CustomUsernamePwdAuthintecationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,24 +31,17 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
+
         http
-                // to accept only https
-//                .requiresChannel(rcc-> rcc.anyRequest().requiresSecure())
-                .securityContext(contextConfig-> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig-> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .csrf(config -> config
-                        .csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-                        .ignoringRequestMatchers("/contacts", "/register")
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                )
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
-                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/notices/**", "/contacts/**", "/user/**","/register/**").permitAll()
+                        .requestMatchers("/notices/**", "/contacts/**", "/user","/api/login", "/register/**", "/error").permitAll()
                         .anyRequest().authenticated()
-                );
-        http.formLogin(Customizer.withDefaults());
+                )
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class);
         http.httpBasic(Customizer.withDefaults());
         http.exceptionHandling(Customizer.withDefaults());
         return http.build();
@@ -51,4 +52,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+                                                       PasswordEncoder passwordEncoder,
+                                                       CustomUsernamePwdAuthintecationProvider customUsernamePwdAuthintecationProvider) {
+        ProviderManager providerManager = new ProviderManager(customUsernamePwdAuthintecationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+        return providerManager;
+    }
 }

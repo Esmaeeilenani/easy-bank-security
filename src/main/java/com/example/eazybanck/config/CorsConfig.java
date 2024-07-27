@@ -1,6 +1,7 @@
 package com.example.eazybanck.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,6 +16,6 @@ public class CorsConfig  implements WebMvcConfigurer {
                 .maxAge(3600L)
                 .allowedHeaders("*")
                 .allowCredentials(true)
-                .exposedHeaders("Authorization");
+                .exposedHeaders(HttpHeaders.AUTHORIZATION);
     }
 }
