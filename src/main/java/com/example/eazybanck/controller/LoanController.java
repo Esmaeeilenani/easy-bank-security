@@ -4,6 +4,7 @@ import com.example.eazybanck.model.Loans;
 import com.example.eazybanck.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ public class LoanController {
 
     private final LoanRepository loanRepository;
 
+    @PreAuthorize("hasRole('USER') && #id == @customerService.loggedInCustomer().id")
     @GetMapping
     public ResponseEntity<List<Loans>> getLoans(@RequestParam long id){
         return ResponseEntity.ok(loanRepository.findByCustomerIdOrderByStartDtDesc(id));

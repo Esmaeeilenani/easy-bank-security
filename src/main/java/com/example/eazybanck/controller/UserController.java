@@ -41,10 +41,10 @@ public class UserController {
         String jwt = null;
         Authentication authentication = UsernamePasswordAuthenticationToken
                 .unauthenticated(loginRequest.username(), loginRequest.password());
-        Authentication authenticate = authenticationManager.authenticate(authentication);
+        Authentication successAuth = authenticationManager.authenticate(authentication);
 
-        if (authenticate == null) {
-            jwt = JwtUtils.generateJWT(authentication);
+        if (successAuth != null) {
+            jwt = JwtUtils.generateJWT(successAuth);
         }
 
 
